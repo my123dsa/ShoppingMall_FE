@@ -1,29 +1,31 @@
 import axios from "axios";
 
 class Axios {
-    static instance;
-
-    constructor() {}
+    static instance = null;
+    // constructor() {}
 
     static getInstance() {
-        console.log(import.meta.env.VITE_SERVER_URL);
+        if (!Axios.instance) {
+            console.log("📦 axios instance created:", process.env.REACT_APP_SERVER_URL);
 
-        // axios 인스턴스 생성
-        Axios.instance = axios.create({
-            baseURL: import.meta.env.VITE_SERVER_URL,
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            withCredentials: true,
-        });
+            Axios.instance = axios.create({
+                baseURL: process.env.REACT_APP_SERVER_URL,
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                withCredentials: true,
+            });
 
-        // 인스턴스에 interceptors 설정
-        Axios.instance.interceptors.response.use(
-            (res) => res,
-            async (error) => {
-                return error;
-            }
-        );
+            // 인터셉터 한 번만 등록
+            Axios.instance.interceptors.response.use(
+                (response) => response,
+                async (error) => {
+                    // 공통 에러 처리도 여기에 추가 가능
+                    console.error("❌ axios response error:", error);
+                    return Promise.reject(error);
+                }
+            );
+        }
 
         return Axios.instance;
     }
